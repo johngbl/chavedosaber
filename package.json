@@ -1,0 +1,16 @@
+{
+	"name": "escola-chave",
+	"private": true,
+	"scripts": {
+		"dev": "concurrently -n backend,frontend -c blue,green \"cd backend && bun run dev\" \"cd frontend && bun run dev\"",
+		"dev:backend": "cd backend && bun run dev",
+		"dev:frontend": "cd frontend && bun run dev",
+		"check": "biome check --write .",
+		"format": "biome format --write .",
+		"lint": "biome lint --write ."
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.4.15",
+		"concurrently": "^8.2.2"
+	}
+}
