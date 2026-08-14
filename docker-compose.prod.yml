@@ -32,7 +32,8 @@ services:
     restart: unless-stopped
     environment:
       # O backend NUNCA deve ver credenciais default em produção.
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      # Defaults espelham o service postgres para a URL nunca sair quebrada.
+      DATABASE_URL: postgres://${POSTGRES_USER:-escolachave}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-escolachave}
       JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET no painel (gere com openssl rand -hex 32)}
       NODE_ENV: production
       PORT: "3000"
@@ -70,7 +71,7 @@ services:
     build: ./backend
     profiles: ["seed"]
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      DATABASE_URL: postgres://${POSTGRES_USER:-escolachave}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-escolachave}
       JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET no painel do Dokploy}
       NODE_ENV: production
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@escolachave.com}
