@@ -14,7 +14,7 @@ export const SCHOOL = {
 	stats: [
 		{ value: 130, label: "alunos matriculados" },
 		{ value: 9, label: "salas climatizadas" },
-		{ value: 10, label: "educadores na equipe" },
-		{ value: 3, label: "etapas de ensino" },
+		{ value: 9, label: "educadores na equipe" },
+		{ value: 2, label: "etapas de ensino" },
 	],
 } as const;

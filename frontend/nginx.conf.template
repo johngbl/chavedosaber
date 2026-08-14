@@ -15,7 +15,12 @@ server {
 	# backend (TRUST_PROXY=true) usa essa última entrada. Sem XFF (edge direto),
 	# o backend usa o X-Real-IP como fallback.
 	location /api/ {
-		proxy_pass http://${BACKEND_HOST}:3000;
+		# Resolução dinâmica via DNS interno do Docker: o nginx sobe mesmo se o
+		# backend ainda não estiver na rede (sem crash-loop no deploy) e não
+		# guarda IP obsoleto em cache.
+		resolver 127.0.0.11 valid=10s ipv6=off;
+		set $api_upstream "http://${BACKEND_HOST}:3000";
+		proxy_pass $api_upstream;
 		proxy_http_version 1.1;
 		proxy_set_header Host $host;
 		proxy_set_header X-Real-IP $remote_addr;

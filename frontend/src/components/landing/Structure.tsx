@@ -35,7 +35,7 @@ const ITEMS: {
 	{
 		icon: IconUsers,
 		title: "Equipe dedicada",
-		desc: "10 educadores para acompanhar 130 alunos de perto.",
+		desc: "9 educadores para acompanhar 127 alunos de perto.",
 	},
 ];
 
