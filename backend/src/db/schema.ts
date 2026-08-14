@@ -17,6 +17,15 @@ export const users = pgTable("users", {
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+/** Links temporários de matrícula (uso único, 30 dias). */
+export const matriculaLinks = pgTable("matricula_links", {
+	id: serial("id").primaryKey(),
+	token: varchar("token", { length: 64 }).notNull().unique(),
+	expiresAt: timestamp("expires_at").notNull(),
+	usedAt: timestamp("used_at"),
+	createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const matriculas = pgTable(
 	"matriculas",
 	{

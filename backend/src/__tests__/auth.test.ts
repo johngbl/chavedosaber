@@ -7,21 +7,7 @@ import { generateValidToken } from "./helpers";
 process.env.JWT_SECRET = "test-secret-key-for-testing";
 process.env.DATABASE_URL = "postgres://test:test@localhost:5432/test";
 
-// Mock do drizzle-orm registrado no setup.ts (preload global).
-
-// Mock do schema — exporta objects simples que as rotas importam
-mock.module("../db/schema", () => ({
-	users: {
-		id: "id",
-		nome: "nome",
-		email: "email",
-		senha: "senha",
-	},
-	matriculas: {
-		id: "id",
-		status: "status",
-	},
-}));
+// Mock do drizzle-orm e do schema registrados no setup.ts (preload global).
 
 // Helpers para criar db mockado
 function createMockDb() {

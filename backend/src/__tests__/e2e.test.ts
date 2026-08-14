@@ -8,65 +8,7 @@ import { generateValidToken } from "./helpers";
 process.env.JWT_SECRET = "test-secret-key-for-testing";
 process.env.DATABASE_URL = "postgres://test:test@localhost:5432/test";
 
-// Mock do drizzle-orm registrado no setup.ts (preload global).
-
-// Mock do schema
-mock.module("../db/schema", () => ({
-	users: {
-		id: "id",
-		nome: "nome",
-		email: "email",
-		senha: "senha",
-	},
-	matriculas: {
-		id: "id",
-		status: "status",
-		serie: "serie",
-		turno: "turno",
-		nomeAluno: "nome_aluno",
-		dataNascimento: "data_nascimento",
-		sexo: "sexo",
-		corRaca: "cor_raca",
-		naturalidade: "naturalidade",
-		sus: "sus",
-		cpfAluno: "cpf_aluno",
-		nomePai: "nome_pai",
-		nomeMae: "nome_mae",
-		endereco: "endereco",
-		telefones: "telefones",
-		emailContato: "email_contato",
-		zonaResidencia: "zona_residencia",
-		utilizaTransporteEscolar: "utiliza_transporte_escolar",
-		possuiProblemaSaude: "possui_problema_saude",
-		qualProblemaSaude: "qual_problema_saude",
-		fazUsoMedicacao: "faz_uso_medicacao",
-		possuiRelatorioMedico: "possui_relatorio_medico",
-		apresentaAlergia: "apresenta_alergia",
-		qualAlergia: "qual_alergia",
-		possuiDeficienciaOuTgd: "possui_deficiencia_ou_tgd",
-		defCegueira: "def_cegueira",
-		defBaixaVisao: "def_baixa_visao",
-		defSurdez: "def_surdez",
-		defAutismoInfantil: "def_autismo_infantil",
-		defSindromeAsperger: "def_sindrome_asperger",
-		defAltasHabilidadesSuperdotacao: "def_altas_habilidades_superdotacao",
-		defSurdocegueira: "def_surdocegueira",
-		defFisica: "def_fisica",
-		defSindromeRett: "def_sindrome_rett",
-		defTranstornoDesintegrativo: "def_transtorno_desintegrativo",
-		defAuditivaInfancia: "def_auditiva_infancia",
-		defIntelectual: "def_intelectual",
-		defMultipla: "def_multipla",
-		recebeBolsaFamilia: "recebe_bolsa_familia",
-		numeroNis: "numero_nis",
-		autorizoUsoImagem: "autorizo_uso_imagem",
-		nomeResponsavel: "nome_responsavel",
-		rgResponsavel: "rg_responsavel",
-		cpfResponsavel: "cpf_responsavel",
-		createdAt: "created_at",
-		updatedAt: "updated_at",
-	},
-}));
+// Mock do drizzle-orm e do schema registrados no setup.ts (preload global).
 
 // Mock do banco de dados
 function createMockDb() {
@@ -237,8 +179,9 @@ describe("E2E Tests", () => {
 	});
 
 	describe("Matrícula Submission", () => {
-		it("should create a new matrícula without authentication", async () => {
+		it("should create a new matrícula with a valid link (sem login)", async () => {
 			const matriculaData = {
+				token: "test-link-token-aaaaaaaaaaaaaaaaaaaaaaaa",
 				serie: "1º Ano",
 				turno: "Matutino",
 				nomeAluno: "Teste E2E Silva",
@@ -258,6 +201,16 @@ describe("E2E Tests", () => {
 
 			const createdMatricula = { id: 1, ...matriculaData, status: "pendente" };
 
+			// Consumo atômico do link
+			mockDb.update.mockReturnValue({
+				set: mock(() => ({
+					where: mock(() => ({
+						returning: mock(() =>
+							Promise.resolve([{ id: 1, token: matriculaData.token }]),
+						),
+					})),
+				})),
+			} as any);
 			mockDb.insert.mockReturnValue({
 				values: mock(() => ({
 					returning: mock(() => Promise.resolve([createdMatricula])),
@@ -277,6 +230,46 @@ describe("E2E Tests", () => {
 			expect(body.id).toBeDefined();
 			expect(body.status).toBe("pendente");
 			expect(body.nomeAluno).toBe("Teste E2E Silva");
+		});
+
+		it("should reject submission with an already-used link (410)", async () => {
+			const matriculaData = {
+				token: "test-link-token-aaaaaaaaaaaaaaaaaaaaaaaa",
+				serie: "1º Ano",
+				turno: "Matutino",
+				nomeAluno: "Teste E2E Silva",
+				dataNascimento: "2015-05-10",
+				sexo: "M",
+				corRaca: "Parda",
+				naturalidade: "Salvador",
+				nomeMae: "Maria Silva",
+				endereco: "Rua Teste, 123",
+				telefones: "(71) 99999-9999",
+				zonaResidencia: "Urbana",
+				nomeResponsavel: "Maria Silva",
+				rgResponsavel: "1234567",
+				cpfResponsavel: "529.982.247-25",
+				autorizoUsoImagem: true,
+			};
+
+			// update retorna [] → link não consumível
+			mockDb.update.mockReturnValue({
+				set: mock(() => ({
+					where: mock(() => ({
+						returning: mock(() => Promise.resolve([])),
+					})),
+				})),
+			} as any);
+
+			const response = await app.handle(
+				new Request("http://localhost/api/matriculas", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(matriculaData),
+				}),
+			);
+
+			expect(response.status).toBe(410);
 		});
 	});
 

@@ -8,67 +8,7 @@ import { generateValidToken } from "./helpers";
 process.env.JWT_SECRET = "test-secret-key-for-testing";
 process.env.DATABASE_URL = "postgres://test:test@localhost:5432/test";
 
-// Mock do drizzle-orm registrado no setup.ts (preload global).
-
-// Mock do schema
-mock.module("../db/schema", () => ({
-	users: {
-		id: "id",
-		nome: "nome",
-		email: "email",
-		senha: "senha",
-	},
-	matriculas: {
-		id: "id",
-		status: "status",
-		serie: "serie",
-		turno: "turno",
-		nomeAluno: "nome_aluno",
-		dataNascimento: "data_nascimento",
-		sexo: "sexo",
-		corRaca: "cor_raca",
-		naturalidade: "naturalidade",
-		sus: "sus",
-		cpfAluno: "cpf_aluno",
-		nomePai: "nome_pai",
-		nomeMae: "nome_mae",
-		endereco: "endereco",
-		telefones: "telefones",
-		telefone2: "telefone2",
-		telefone3: "telefone3",
-		emailContato: "email_contato",
-		zonaResidencia: "zona_residencia",
-		utilizaTransporteEscolar: "utiliza_transporte_escolar",
-		possuiProblemaSaude: "possui_problema_saude",
-		qualProblemaSaude: "qual_problema_saude",
-		fazUsoMedicacao: "faz_uso_medicacao",
-		possuiRelatorioMedico: "possui_relatorio_medico",
-		apresentaAlergia: "apresenta_alergia",
-		qualAlergia: "qual_alergia",
-		possuiDeficienciaOuTgd: "possui_deficiencia_ou_tgd",
-		defCegueira: "def_cegueira",
-		defBaixaVisao: "def_baixa_visao",
-		defSurdez: "def_surdez",
-		defAutismoInfantil: "def_autismo_infantil",
-		defSindromeAsperger: "def_sindrome_asperger",
-		defAltasHabilidadesSuperdotacao: "def_altas_habilidades_superdotacao",
-		defSurdocegueira: "def_surdocegueira",
-		defFisica: "def_fisica",
-		defSindromeRett: "def_sindrome_rett",
-		defTranstornoDesintegrativo: "def_transtorno_desintegrativo",
-		defAuditivaInfancia: "def_auditiva_infancia",
-		defIntelectual: "def_intelectual",
-		defMultipla: "def_multipla",
-		recebeBolsaFamilia: "recebe_bolsa_familia",
-		numeroNis: "numero_nis",
-		autorizoUsoImagem: "autorizo_uso_imagem",
-		nomeResponsavel: "nome_responsavel",
-		rgResponsavel: "rg_responsavel",
-		cpfResponsavel: "cpf_responsavel",
-		createdAt: "created_at",
-		updatedAt: "updated_at",
-	},
-}));
+// Mock do drizzle-orm e do schema registrados no setup.ts (preload global).
 
 // Helpers para criar db mockado
 function createMockDb() {
@@ -103,10 +43,24 @@ mock.module("../db/connection", () => ({
 	},
 }));
 
+/** Simula o consumo atômico do link (update com returning). */
+function mockClaimLink(claimed: unknown) {
+	mockDb.update.mockReturnValue({
+		set: mock(() => ({
+			where: mock(() => ({
+				returning: mock(() => Promise.resolve(claimed ? [claimed] : [])),
+			})),
+		})),
+	} as any);
+}
+
 // CPF válido (dígitos verificadores corretos) — usado nos fixtures
 const VALID_CPF = "529.982.247-25";
+// Token de link temporário (32+ caracteres)
+const VALID_TOKEN = "test-link-token-aaaaaaaaaaaaaaaaaaaaaaaa";
 
 const validMatriculaData = {
+	token: VALID_TOKEN,
 	serie: "1º Ano",
 	turno: "Matutino",
 	nomeAluno: "João Silva",
@@ -149,6 +103,7 @@ const validMatriculaData = {
 };
 
 const minimalData = {
+	token: VALID_TOKEN,
 	serie: "1º Ano",
 	turno: "Matutino",
 	nomeAluno: "João Silva",
@@ -177,13 +132,14 @@ describe("Matrícula Routes", () => {
 	});
 
 	describe("POST /api/matriculas", () => {
-		it("should create a new matrícula", async () => {
+		it("should create a new matrícula with a valid link", async () => {
 			const createdMatricula = {
 				id: 1,
 				...validMatriculaData,
 				status: "pendente",
 			};
 
+			mockClaimLink({ id: 1, token: VALID_TOKEN });
 			mockDb.insert.mockReturnValue({
 				values: mock(() => ({
 					returning: mock(() => Promise.resolve([createdMatricula])),
@@ -205,6 +161,44 @@ describe("Matrícula Routes", () => {
 			const body = await response.json();
 			expect(body.id).toBe(1);
 			expect(body.status).toBe("pendente");
+		});
+
+		it("should reject when the link token is missing (422)", async () => {
+			const { matriculaRoutes } = await import("../routes/matriculas");
+			const app = new Elysia().use(matriculaRoutes);
+
+			const response = await app.handle(
+				new Request("http://localhost/api/matriculas", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						...validMatriculaData,
+						token: undefined,
+					}),
+				}),
+			);
+
+			expect(response.status).toBe(422);
+		});
+
+		it("should reject when the link is already used or expired (410)", async () => {
+			// update retorna [] → link não pode ser consumido
+			mockClaimLink(null);
+
+			const { matriculaRoutes } = await import("../routes/matriculas");
+			const app = new Elysia().use(matriculaRoutes);
+
+			const response = await app.handle(
+				new Request("http://localhost/api/matriculas", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(validMatriculaData),
+				}),
+			);
+
+			expect(response.status).toBe(410);
+			const body = await response.json();
+			expect(body.error).toContain("Link");
 		});
 
 		it("should validate required fields (422)", async () => {
@@ -325,6 +319,7 @@ describe("Matrícula Routes", () => {
 				status: "pendente",
 			};
 
+			mockClaimLink({ id: 1, token: VALID_TOKEN });
 			mockDb.insert.mockReturnValue({
 				values: mock(() => ({
 					returning: mock(() => Promise.resolve([createdMatricula])),
@@ -343,6 +338,177 @@ describe("Matrícula Routes", () => {
 			);
 
 			expect(response.status).toBe(201);
+		});
+	});
+
+	describe("Links temporários de matrícula", () => {
+		const futureLink = {
+			id: 1,
+			token: VALID_TOKEN,
+			expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+			usedAt: null,
+		};
+
+		describe("POST /api/matriculas/links (gerar)", () => {
+			it("should return 401 without authentication", async () => {
+				const { matriculaRoutes } = await import("../routes/matriculas");
+				const app = new Elysia().use(matriculaRoutes);
+
+				const response = await app.handle(
+					new Request("http://localhost/api/matriculas/links", {
+						method: "POST",
+					}),
+				);
+
+				expect(response.status).toBe(401);
+			});
+
+			it("should generate a link with 30 days expiry when authenticated", async () => {
+				const jwtToken = await generateValidToken();
+				mockDb.insert.mockReturnValue({
+					values: mock(() => ({})),
+				} as any);
+
+				const { matriculaRoutes } = await import("../routes/matriculas");
+				const app = new Elysia().use(matriculaRoutes);
+
+				const response = await app.handle(
+					new Request("http://localhost/api/matriculas/links", {
+						method: "POST",
+						headers: { Authorization: `Bearer ${jwtToken}` },
+					}),
+				);
+
+				expect(response.status).toBe(201);
+				const body = (await response.json()) as {
+					token: string;
+					expiresAt: string;
+					link: string;
+				};
+				expect(body.token.length).toBeGreaterThanOrEqual(32);
+				expect(body.link).toBe(`/matricula/${body.token}`);
+				const expires = new Date(body.expiresAt).getTime();
+				const delta = expires - Date.now();
+				expect(delta).toBeGreaterThan(29 * 24 * 60 * 60 * 1000);
+				expect(delta).toBeLessThanOrEqual(30 * 24 * 60 * 60 * 1000);
+			});
+		});
+
+		describe("GET /api/matriculas/links (listar)", () => {
+			it("should return 401 without authentication", async () => {
+				const { matriculaRoutes } = await import("../routes/matriculas");
+				const app = new Elysia().use(matriculaRoutes);
+
+				const response = await app.handle(
+					new Request("http://localhost/api/matriculas/links"),
+				);
+
+				expect(response.status).toBe(401);
+			});
+
+			it("should list recent links when authenticated", async () => {
+				const jwtToken = await generateValidToken();
+				mockDb.select.mockReturnValue({
+					from: mock(() => ({
+						orderBy: mock(() => ({
+							limit: mock(() => Promise.resolve([futureLink])),
+						})),
+					})),
+				} as any);
+
+				const { matriculaRoutes } = await import("../routes/matriculas");
+				const app = new Elysia().use(matriculaRoutes);
+
+				const response = await app.handle(
+					new Request("http://localhost/api/matriculas/links", {
+						headers: { Authorization: `Bearer ${jwtToken}` },
+					}),
+				);
+
+				expect(response.status).toBe(200);
+				const body = (await response.json()) as unknown[];
+				expect(body).toHaveLength(1);
+			});
+		});
+
+		describe("GET /api/matriculas/links/:token (validar, público)", () => {
+			it("should accept a valid unused link", async () => {
+				mockDb.select.mockReturnValue({
+					from: mock(() => ({
+						where: mock(() => ({
+							limit: mock(() => Promise.resolve([futureLink])),
+						})),
+					})),
+				} as any);
+
+				const { matriculaRoutes } = await import("../routes/matriculas");
+				const app = new Elysia().use(matriculaRoutes);
+
+				const response = await app.handle(
+					new Request(`http://localhost/api/matriculas/links/${VALID_TOKEN}`),
+				);
+
+				expect(response.status).toBe(200);
+				const body = (await response.json()) as { valid: boolean };
+				expect(body.valid).toBe(true);
+			});
+
+			it("should reject an expired link (410)", async () => {
+				const expired = {
+					...futureLink,
+					expiresAt: new Date(Date.now() - 1000),
+				};
+				mockDb.select.mockReturnValue({
+					from: mock(() => ({
+						where: mock(() => ({
+							limit: mock(() => Promise.resolve([expired])),
+						})),
+					})),
+				} as any);
+
+				const { matriculaRoutes } = await import("../routes/matriculas");
+				const app = new Elysia().use(matriculaRoutes);
+
+				const response = await app.handle(
+					new Request(`http://localhost/api/matriculas/links/${VALID_TOKEN}`),
+				);
+
+				expect(response.status).toBe(410);
+			});
+
+			it("should reject an already-used link (410)", async () => {
+				const used = { ...futureLink, usedAt: new Date() };
+				mockDb.select.mockReturnValue({
+					from: mock(() => ({
+						where: mock(() => ({
+							limit: mock(() => Promise.resolve([used])),
+						})),
+					})),
+				} as any);
+
+				const { matriculaRoutes } = await import("../routes/matriculas");
+				const app = new Elysia().use(matriculaRoutes);
+
+				const response = await app.handle(
+					new Request(`http://localhost/api/matriculas/links/${VALID_TOKEN}`),
+				);
+
+				expect(response.status).toBe(410);
+			});
+
+			it("should reject an unknown token (410)", async () => {
+				// select padrão resolve [] → link não encontrado
+				const { matriculaRoutes } = await import("../routes/matriculas");
+				const app = new Elysia().use(matriculaRoutes);
+
+				const response = await app.handle(
+					new Request(
+						"http://localhost/api/matriculas/links/token-inexistente-1234567890",
+					),
+				);
+
+				expect(response.status).toBe(410);
+			});
 		});
 	});
 

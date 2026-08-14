@@ -61,6 +61,22 @@ export interface MatriculaListResponse {
 	totalPages: number;
 }
 
+/** Link temporário de matrícula (uso único, 30 dias). */
+export interface MatriculaLink {
+	id: number;
+	token: string;
+	expiresAt: string;
+	usedAt: string | null;
+	createdAt: string;
+}
+
+/** Resposta de geração de link. */
+export interface MatriculaLinkResponse {
+	token: string;
+	expiresAt: string;
+	link: string;
+}
+
 export const emptyFormData: MatriculaFormData = {
 	serie: "",
 	turno: "",

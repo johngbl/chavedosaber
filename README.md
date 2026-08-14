@@ -89,7 +89,10 @@ bun run dev
 | `POST` | `/api/auth/login` | Não | Login do administrador → cookie httpOnly + `{ nome }` |
 | `GET` | `/api/auth/me` | Sim | Dados do usuário logado (valida a sessão) |
 | `POST` | `/api/auth/logout` | Não | Encerra a sessão (expira o cookie) |
-| `POST` | `/api/matriculas` | Não | Submeter pré-matrícula (validações semânticas → 400) |
+| `POST` | `/api/matriculas/links` | Sim | Gerar link temporário de matrícula (uso único, 30 dias) |
+| `GET` | `/api/matriculas/links` | Sim | Listar links recentes com status (ativo/usado/expirado) |
+| `GET` | `/api/matriculas/links/:token` | Não | Validar link ao abrir o formulário (não o consome) |
+| `POST` | `/api/matriculas` | Não | Submeter pré-matrícula (exige `token` válido; uso único → 410 na reutilização) |
 | `GET` | `/api/matriculas` | Sim | Listar paginado no SQL (`?page=1&limit=10&status=pendente`) |
 | `GET` | `/api/matriculas/:id` | Sim | Detalhes de uma matrícula |
 | `PATCH` | `/api/matriculas/:id/status` | Sim | Atualizar status (`pendente`, `aprovada`, `rejeitada`) |
@@ -182,30 +185,32 @@ EscolaChave/
     ├── Dockerfile
     ├── nginx.conf            # SPA + proxy /api + headers de IP real
     ├── vite.config.ts
-    └── src/
-        ├── App.tsx           # Router + ProtectedRoute
-        ├── api/client.ts     # fetch com credentials, 401 → evento, 204
-        ├── contexts/AuthContext.tsx  # sessão via /me, logout real
-        ├── utils/validations.ts      # validações client-side
-        ├── components/…      # Stepper, Steps, StatusBadge, PrintTermo
-        └── pages/…           # Formulario, Login, Dashboard, Detalhe, 404
-```
+    	└── src/
+    		├── App.tsx           # Router + ProtectedRoute
+    		├── api/client.ts     # fetch com credentials, 401 → evento, 204
+    		├── contexts/AuthContext.tsx  # sessão via /me, logout real
+    		├── utils/validations.ts      # validações client-side
+    		├── components/…      # Stepper, Steps, StatusBadge, PrintTermo
+    		└── pages/…           # Landing, Matrícula (link), Login, Dashboard, Detalhe, 404
+    ```
 
 ---
 
 ## Como Usar
 
-### Fluxo do Encarregado de Educação (Público)
+### Fluxo do Encarregado de Educação (via link de convite)
 
-1. Aceder ao formulário de pré-matrícula (página inicial).
-2. Preencher em 4 passos: **Dados do Aluno** → **Filiação e Contacto** → **Saúde e Deficiências** → **Responsável Legal** (com consentimento LGPD e autorização de imagem).
-3. Submeter e aguardar a confirmação visual.
+1. A secretaria envia um **link de convite** (WhatsApp/e-mail). O link é **uso único** e válido por **30 dias**.
+2. Ao abrir `/matricula/:token`, o link é validado; se estiver expirado, já utilizado ou inválido, o formulário não abre.
+3. Preencher em 4 passos: **Dados do Aluno** → **Filiação e Contacto** → **Saúde e Deficiências** → **Responsável Legal** (com consentimento LGPD e autorização de imagem).
+4. Submeter e aguardar a confirmação visual.
 
 ### Fluxo da Administração / Secretaria (Protegido)
 
 1. Aceder `/login` e iniciar sessão.
-2. **Painel:** tabela de pré-matrículas com filtros por status (`pendente`/`aprovada`/`rejeitada`) e paginação.
-3. **Detalhes:** aprovar/rejeitar e gerar o **Termo de Assinatura** (impressão A4 com cabeçalho oficial).
+2. **Gerar link de matrícula:** no painel, clique em **"+ Gerar link de matrícula"** e copie o link para enviar à família. A lista de links mostra o status (ativo/usado/expirado).
+3. **Painel:** tabela de pré-matrículas com filtros por status (`pendente`/`aprovada`/`rejeitada`) e paginação.
+4. **Detalhes:** aprovar/rejeitar e gerar o **Termo de Assinatura** (impressão A4 com cabeçalho oficial).
 
 ---
 

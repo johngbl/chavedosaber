@@ -1,7 +1,8 @@
-import { count, desc, eq } from "drizzle-orm";
+import { randomBytes } from "node:crypto";
+import { and, count, desc, eq, gt, isNull } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../db/connection";
-import { matriculas } from "../db/schema";
+import { matriculaLinks, matriculas } from "../db/schema";
 import { authBeforeHandle } from "../middleware/auth";
 import {
 	isValidCpf,
@@ -18,7 +19,14 @@ const STATUS_VALUES = t.Union([
 
 const cpfPattern = "^[0-9]{3}\\.[0-9]{3}\\.[0-9]{3}-[0-9]{2}$";
 
+/** Validade dos links temporários de matrícula: 30 dias. */
+const LINK_EXPIRES_IN_MS = 30 * 24 * 60 * 60 * 1000;
+
 const matriculaBodySchema = t.Object({
+	token: t.String({
+		minLength: 32,
+		error: "Token de matrícula ausente ou inválido",
+	}),
 	serie: t.String({ minLength: 1 }),
 	turno: t.String({ minLength: 1 }),
 	nomeAluno: t.String({ minLength: 1 }),
@@ -136,6 +144,9 @@ function semanticValidationErrors(body: Record<string, unknown>): string[] {
 }
 
 function sanitizeMatriculaBody(body: Record<string, unknown>) {
+	// O token de acesso não pertence à tabela de matrículas.
+	const cleaned = { ...body };
+	delete cleaned.token;
 	const optionalStringKeys = [
 		"sus",
 		"cpfAluno",
@@ -148,7 +159,6 @@ function sanitizeMatriculaBody(body: Record<string, unknown>) {
 		"numeroNis",
 	] as const;
 
-	const cleaned = { ...body };
 	for (const key of optionalStringKeys) {
 		if (cleaned[key] === "") {
 			cleaned[key] = null;
@@ -158,11 +168,31 @@ function sanitizeMatriculaBody(body: Record<string, unknown>) {
 }
 
 export const matriculaRoutes = new Elysia({ prefix: "/api/matriculas" })
-	// Público
+	// Público: enviar pré-matrícula com um link temporário válido.
 	.post(
 		"/",
 		async ({ body, set }) => {
 			try {
+				const now = new Date();
+				// Consumo atômico do link: só 1 matrícula consegue "usar" o token
+				// (uma única linha é atualizada por token, mesmo em concorrência).
+				const [claimed] = await db
+					.update(matriculaLinks)
+					.set({ usedAt: now })
+					.where(
+						and(
+							eq(matriculaLinks.token, String(body.token ?? "")),
+							isNull(matriculaLinks.usedAt),
+							gt(matriculaLinks.expiresAt, now),
+						),
+					)
+					.returning();
+
+				if (!claimed) {
+					set.status = 410;
+					return { error: "Link inválido, expirado ou já utilizado" };
+				}
+
 				const values = sanitizeMatriculaBody(body as Record<string, unknown>);
 				const [result] = await db
 					.insert(matriculas)
@@ -195,9 +225,53 @@ export const matriculaRoutes = new Elysia({ prefix: "/api/matriculas" })
 			},
 		},
 	)
+	// Público: validar o link ao abrir o formulário (não o consome).
+	.get(
+		"/links/:token",
+		async ({ params, set }) => {
+			const [link] = await db
+				.select()
+				.from(matriculaLinks)
+				.where(eq(matriculaLinks.token, params.token))
+				.limit(1);
+			if (!link) {
+				set.status = 410;
+				return { error: "Link inválido" };
+			}
+			if (link.usedAt) {
+				set.status = 410;
+				return { error: "Link já utilizado" };
+			}
+			if (link.expiresAt.getTime() < Date.now()) {
+				set.status = 410;
+				return { error: "Link expirado" };
+			}
+			return { valid: true, expiresAt: link.expiresAt };
+		},
+		{
+			params: t.Object({ token: t.String() }),
+		},
+	)
 	// Privado
 	.guard({ beforeHandle: authBeforeHandle }, (app) =>
 		app
+			// Gerar link temporário de matrícula (uso único, 30 dias).
+			.post("/links", async ({ set }) => {
+				const token = randomBytes(24).toString("base64url");
+				const expiresAt = new Date(Date.now() + LINK_EXPIRES_IN_MS);
+				await db.insert(matriculaLinks).values({ token, expiresAt });
+				set.status = 201;
+				return { token, expiresAt, link: `/matricula/${token}` };
+			})
+			// Listar links recentes (status: ativo/usado/expirado).
+			.get("/links", async () => {
+				const data = await db
+					.select()
+					.from(matriculaLinks)
+					.orderBy(desc(matriculaLinks.createdAt))
+					.limit(20);
+				return data;
+			})
 			.get(
 				"/",
 				async ({ query }) => {

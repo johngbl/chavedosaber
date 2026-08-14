@@ -38,9 +38,6 @@ pnpm-debug.log*
 # Testing
 coverage/
 
-# Agentes / task state (local)
-AGENTS.md
-
 # Misc
 *.pem
 *.trace

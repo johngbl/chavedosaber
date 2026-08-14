@@ -3,11 +3,21 @@ import { Link, useNavigate } from "react-router-dom";
 import { apiFetch } from "../api/client";
 import { StatusBadge } from "../components/StatusBadge";
 import { useAuth } from "../contexts/AuthContext";
-import type { Matricula, MatriculaListResponse } from "../types/matricula";
+import type {
+	Matricula,
+	MatriculaLink,
+	MatriculaLinkResponse,
+	MatriculaListResponse,
+} from "../types/matricula";
 
 type StatusFilter = "todos" | "pendente" | "aprovada" | "rejeitada";
 
 const PAGE_SIZE = 10;
+
+function formatDate(iso: string | null | undefined): string {
+	if (!iso) return "—";
+	return new Date(iso).toLocaleDateString("pt-BR");
+}
 
 export function DashboardPage() {
 	const { logout, nome } = useAuth();
@@ -19,6 +29,53 @@ export function DashboardPage() {
 	const [total, setTotal] = useState(0);
 	const [totalPages, setTotalPages] = useState(1);
 	const [error, setError] = useState("");
+
+	// Links temporários de matrícula
+	const [links, setLinks] = useState<MatriculaLink[]>([]);
+	const [linksLoading, setLinksLoading] = useState(true);
+	const [newLink, setNewLink] = useState<MatriculaLinkResponse | null>(null);
+	const [linkError, setLinkError] = useState("");
+	const [generating, setGenerating] = useState(false);
+	const [copied, setCopied] = useState(false);
+
+	const loadLinks = useCallback(async () => {
+		try {
+			setLinksLoading(true);
+			const data = await apiFetch<MatriculaLink[]>("/matriculas/links");
+			setLinks(data);
+		} catch {
+			setLinks([]);
+		} finally {
+			setLinksLoading(false);
+		}
+	}, []);
+
+	async function generateLink() {
+		setGenerating(true);
+		setLinkError("");
+		setCopied(false);
+		try {
+			const data = await apiFetch<MatriculaLinkResponse>("/matriculas/links", {
+				method: "POST",
+			});
+			setNewLink(data);
+			await loadLinks();
+		} catch (err) {
+			setLinkError(err instanceof Error ? err.message : "Erro ao gerar link");
+		} finally {
+			setGenerating(false);
+		}
+	}
+
+	async function copyLink(link: string) {
+		try {
+			await navigator.clipboard.writeText(`${window.location.origin}${link}`);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		} catch {
+			setLinkError("Não foi possível copiar o link.");
+		}
+	}
 
 	const loadMatriculas = useCallback(async () => {
 		try {
@@ -50,6 +107,10 @@ export function DashboardPage() {
 	useEffect(() => {
 		loadMatriculas();
 	}, [loadMatriculas]);
+
+	useEffect(() => {
+		loadLinks();
+	}, [loadLinks]);
 
 	function handleFilterChange(next: StatusFilter) {
 		setFilter(next);
@@ -88,6 +149,135 @@ export function DashboardPage() {
 			</header>
 
 			<main className="max-w-6xl mx-auto px-4 py-6">
+				{/* Links temporários de matrícula */}
+				<section className="bg-white rounded-xl shadow p-5 mb-6">
+					<div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+						<div>
+							<h2 className="text-base font-semibold text-gray-800">
+								Links de Matrícula
+							</h2>
+							<p className="text-xs text-gray-500 mt-0.5">
+								Uso único — válido por 30 dias. Envie o link para a família
+								preencher a ficha.
+							</p>
+						</div>
+						<button
+							type="button"
+							onClick={generateLink}
+							disabled={generating}
+							className="px-4 py-2 text-sm font-medium text-white bg-brand-green rounded-lg hover:bg-brand-green-dark disabled:opacity-60 transition-colors"
+						>
+							{generating ? "Gerando..." : "+ Gerar link de matrícula"}
+						</button>
+					</div>
+
+					{linkError && (
+						<div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+							{linkError}
+						</div>
+					)}
+
+					{newLink && (
+						<div className="mb-4 p-3 bg-brand-green-light border border-brand-green/30 rounded-lg">
+							<p className="text-xs text-brand-green-dark mb-1 font-medium">
+								Link gerado (válido até {formatDate(newLink.expiresAt)}):
+							</p>
+							<div className="flex items-center gap-2 flex-wrap">
+								<code className="text-xs bg-white rounded border px-2 py-1 text-gray-700 break-all flex-1 min-w-0">
+									{window.location.origin}
+									{newLink.link}
+								</code>
+								<button
+									type="button"
+									onClick={() => copyLink(newLink.link)}
+									className="px-3 py-1.5 text-xs font-medium rounded-lg border bg-white text-gray-700 hover:bg-gray-50"
+								>
+									{copied ? "Copiado!" : "Copiar"}
+								</button>
+							</div>
+						</div>
+					)}
+
+					<div className="overflow-x-auto">
+						<table className="w-full text-sm">
+							<thead className="bg-gray-50 border-b">
+								<tr>
+									<th className="text-left px-3 py-2 font-medium text-gray-600">
+										Criado
+									</th>
+									<th className="text-left px-3 py-2 font-medium text-gray-600">
+										Expira
+									</th>
+									<th className="text-left px-3 py-2 font-medium text-gray-600">
+										Status
+									</th>
+									<th className="text-left px-3 py-2 font-medium text-gray-600">
+										Ações
+									</th>
+								</tr>
+							</thead>
+							<tbody className="divide-y">
+								{linksLoading ? (
+									<tr>
+										<td colSpan={4} className="px-3 py-3 text-gray-400">
+											Carregando...
+										</td>
+									</tr>
+								) : links.length === 0 ? (
+									<tr>
+										<td colSpan={4} className="px-3 py-3 text-gray-400">
+											Nenhum link gerado ainda.
+										</td>
+									</tr>
+								) : (
+									links.map((link) => {
+										const expired =
+											!link.usedAt &&
+											new Date(link.expiresAt).getTime() < Date.now();
+										const status = link.usedAt
+											? "Utilizado"
+											: expired
+												? "Expirado"
+												: "Ativo";
+										return (
+											<tr key={link.id}>
+												<td className="px-3 py-2 text-gray-600">
+													{formatDate(link.createdAt)}
+												</td>
+												<td className="px-3 py-2 text-gray-600">
+													{formatDate(link.expiresAt)}
+												</td>
+												<td className="px-3 py-2">
+													<span
+														className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+															status === "Ativo"
+																? "bg-brand-green-light text-brand-green-dark"
+																: status === "Utilizado"
+																	? "bg-gray-100 text-gray-600"
+																	: "bg-red-50 text-red-600"
+														}`}
+													>
+														{status}
+													</span>
+												</td>
+												<td className="px-3 py-2">
+													<button
+														type="button"
+														onClick={() => copyLink(`/matricula/${link.token}`)}
+														className="text-xs text-brand-green hover:underline"
+													>
+														Copiar link
+													</button>
+												</td>
+											</tr>
+										);
+									})
+								)}
+							</tbody>
+						</table>
+					</div>
+				</section>
+
 				<div className="flex items-center gap-2 mb-4 flex-wrap">
 					{(
 						["todos", "pendente", "aprovada", "rejeitada"] as StatusFilter[]

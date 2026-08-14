@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import { apiFetch } from "../api/client";
 import { StepDadosAluno } from "../components/StepDadosAluno";
 import { StepFiliacao } from "../components/StepFiliacao";
@@ -67,12 +68,36 @@ const STEP_VALIDATORS: ((data: MatriculaFormData) => StepErrors)[] = [
 ];
 
 export function FormularioPage() {
+	const { token = "" } = useParams<{ token: string }>();
 	const [step, setStep] = useState(0);
 	const [data, setData] = useState<MatriculaFormData>(emptyFormData);
 	const [errors, setErrors] = useState<StepErrors>({});
 	const [submitting, setSubmitting] = useState(false);
 	const [success, setSuccess] = useState(false);
 	const [submitError, setSubmitError] = useState("");
+	// "loading" | "valid" | "invalid" — o formulário só abre com link válido.
+	const [linkStatus, setLinkStatus] = useState<"loading" | "valid" | "invalid">(
+		"loading",
+	);
+	const [linkError, setLinkError] = useState("");
+
+	useEffect(() => {
+		let cancelled = false;
+		apiFetch<{ valid: true }>(`/matriculas/links/${token}`)
+			.then(() => {
+				if (!cancelled) setLinkStatus("valid");
+			})
+			.catch((err: unknown) => {
+				if (cancelled) return;
+				setLinkStatus("invalid");
+				setLinkError(
+					err instanceof Error ? err.message : "Link inválido ou expirado",
+				);
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, [token]);
 
 	function handleChange<K extends keyof MatriculaFormData>(
 		field: K,
@@ -111,6 +136,8 @@ export function FormularioPage() {
 			if (value === "") continue; // Não inclui campos opcionais vazios
 			cleaned[key] = value;
 		}
+		// Token do link de matrícula (validado no boot da página)
+		cleaned.token = token;
 		return cleaned;
 	}
 
@@ -131,6 +158,51 @@ export function FormularioPage() {
 		} finally {
 			setSubmitting(false);
 		}
+	}
+
+	if (linkStatus === "loading") {
+		return (
+			<div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+				<p className="text-gray-400">Carregando...</p>
+			</div>
+		);
+	}
+
+	if (linkStatus === "invalid") {
+		return (
+			<div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+				<div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
+					<div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+						<svg
+							role="img"
+							aria-label="Link inválido"
+							className="w-8 h-8 text-red-600"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<title>Link inválido</title>
+							<path
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								strokeWidth={2}
+								d="M6 18L18 6M6 6l12 12"
+							/>
+						</svg>
+					</div>
+					<h2 className="text-xl font-semibold text-gray-800 mb-2">
+						Link indisponível
+					</h2>
+					<p className="text-gray-600 text-sm mb-6">{linkError}</p>
+					<Link
+						to="/"
+						className="inline-block px-4 py-2 text-sm font-medium text-white bg-brand-green rounded-lg hover:bg-brand-green-dark transition-colors"
+					>
+						Voltar ao início
+					</Link>
+				</div>
+			</div>
+		);
 	}
 
 	if (success) {

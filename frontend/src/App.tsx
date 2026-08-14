@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { DashboardPage } from "./pages/DashboardPage";
 import { DetalhePage } from "./pages/DetalhePage";
 import { FormularioPage } from "./pages/FormularioPage";
+import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 
@@ -27,7 +28,8 @@ function App() {
 		<BrowserRouter>
 			<AuthProvider>
 				<Routes>
-					<Route path="/" element={<FormularioPage />} />
+					<Route path="/" element={<LandingPage />} />
+					<Route path="/matricula/:token" element={<FormularioPage />} />
 					<Route path="/login" element={<LoginPage />} />
 					<Route
 						path="/admin"

@@ -18,15 +18,6 @@ mock.module("../db/connection", () => ({
 	db: mockDb,
 }));
 
-mock.module("../db/schema", () => ({
-	users: {
-		id: "id",
-		nome: "nome",
-		email: "email",
-		senha: "senha",
-	},
-}));
-
 describe("Seed Script", () => {
 	it("should hash password using Bun.password", async () => {
 		const password = "test123";
