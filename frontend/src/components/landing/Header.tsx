@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { SCHOOL } from "../../content/school";
 import { scrollToId } from "../../lib/smoothScroll";
 import { IconFacebook, IconInstagram, IconWhatsapp } from "./icons";
@@ -87,12 +86,6 @@ export function Header() {
 						<IconWhatsapp className="size-4" />
 						WhatsApp
 					</a>
-					<Link
-						to="/login"
-						className="ml-2 text-xs font-extrabold uppercase tracking-[0.14em] text-ink/40 transition-colors hover:text-brand-blue"
-					>
-						Secretaria
-					</Link>
 				</div>
 			</div>
 		</header>

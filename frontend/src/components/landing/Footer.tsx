@@ -1,18 +1,15 @@
 import { Link } from "react-router-dom";
 import { SCHOOL } from "../../content/school";
-import { IconFacebook, IconInstagram, IconKey, IconMail, IconMapPin, IconPhone } from "./icons";
+import { IconFacebook, IconInstagram, IconMail, IconMapPin, IconPhone } from "./icons";
 
 export function Footer() {
 	return (
 		<footer id="contato" className="relative scroll-mt-24 overflow-hidden bg-brand-blue-dark pb-8 pt-16 text-white">
-			<IconKey
-				className="pointer-events-none absolute -right-16 -top-10 size-72 rotate-12 text-white/5"
-		/>
 			<div className="mx-auto grid max-w-6xl gap-12 px-4 md:grid-cols-[1.2fr_1fr_1fr]">
-				<div>
-					<div className="inline-flex rounded-2xl bg-white p-2.5 shadow-lg">
-						<img src="/logo.png" alt="Logotipo da Escola Chave do Saber" className="h-14 w-auto" />
-					</div>
+					<div>
+						<div className="flex size-20 items-center justify-center rounded-2xl bg-white p-2 shadow-lg">
+							<img src="/logo.png" alt="Logotipo da Escola Chave do Saber" className="h-full w-full object-contain" />
+						</div>
 					<p className="mt-4 font-display text-xl font-bold">{SCHOOL.name}</p>
 					<p className="mt-1 text-sm font-semibold text-white/60">{SCHOOL.slogan}</p>
 					<div className="mt-5 flex gap-2">
@@ -74,10 +71,10 @@ export function Footer() {
 				<div>
 					<h3 className="font-display text-lg font-bold text-brand-yellow">Informações</h3>
 					<ul className="mt-5 space-y-2.5 text-sm text-white/75">
-						<li>Código INEP {SCHOOL.inep}</li>
 						<li>Escola da rede privada</li>
 						<li>Acessibilidade completa</li>
-						<li>Matrícula por link pessoal da secretaria</li>
+						<li>Salas climatizadas</li>
+						<li>Biblioteca e pátio coberto</li>
 					</ul>
 					<Link
 						to="/login"

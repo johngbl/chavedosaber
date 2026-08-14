@@ -35,7 +35,7 @@ const ITEMS: {
 	{
 		icon: IconUsers,
 		title: "Equipe dedicada",
-		desc: "10 educadores para acompanhar 127 alunos de perto.",
+		desc: "10 educadores para acompanhar 130 alunos de perto.",
 	},
 ];
 
@@ -46,7 +46,7 @@ export function Structure() {
 				<SectionTitle
 					eyebrow="Estrutura"
 					title="Conforto e acessibilidade de verdade"
-					sub="Infraestrutura declarada no Censo Escolar 2025 — pensada para acolher cada criança com segurança."
+					sub="Pátio coberto, biblioteca e salas climatizadas: tudo pensado para acolher cada criança com segurança."
 				/>
 				<div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 					{ITEMS.map((item, index) => {

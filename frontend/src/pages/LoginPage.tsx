@@ -1,5 +1,5 @@
 import { type FormEvent, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 export function LoginPage() {
@@ -64,7 +64,7 @@ export function LoginPage() {
 							onChange={(e) => setEmail(e.target.value)}
 							required
 							className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-green focus:outline-none"
-							placeholder="admin@escolachave.com"
+							placeholder="seu@email.com"
 						/>
 					</div>
 					<div>
@@ -92,11 +92,6 @@ export function LoginPage() {
 					</button>
 				</form>
 
-				<div className="mt-4 text-center">
-					<Link to="/" className="text-sm text-brand-green hover:underline">
-						Voltar ao formulário de pré-matrícula
-					</Link>
-				</div>
 			</div>
 		</div>
 	);

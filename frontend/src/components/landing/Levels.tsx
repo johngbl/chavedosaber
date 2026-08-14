@@ -14,7 +14,6 @@ const LEVELS: {
 	icon: ComponentType<{ className?: string }>;
 	title: string;
 	desc: string;
-	chip: string;
 	tone: Tone;
 	span?: boolean;
 }[] = [
@@ -22,7 +21,6 @@ const LEVELS: {
 		icon: IconShapes,
 		title: "Educação Infantil",
 		desc: "Os primeiros passos com afeto: linguagem, movimento e descoberta em um ambiente seguro, colorido e estimulante.",
-		chip: "57 matrículas no Censo 2025",
 		tone: "orange",
 		span: true,
 	},
@@ -30,14 +28,12 @@ const LEVELS: {
 		icon: IconBook,
 		title: "Ensino Fundamental",
 		desc: "Leitura, raciocínio e autonomia com acompanhamento próximo de cada estudante.",
-		chip: "70 matrículas no Censo 2025",
 		tone: "green",
 	},
 	{
 		icon: IconHeart,
 		title: "Educação Especial",
-		desc: "Inclusão de verdade: suporte dedicado para que cada criança avance no seu ritmo, com dignidade e carinho.",
-		chip: "Atendimento especializado",
+		desc: "Suporte dedicado para que cada criança avance no seu ritmo, com dignidade e carinho.",
 		tone: "blue",
 	},
 ];
@@ -71,9 +67,6 @@ export function Levels() {
 									</span>
 									<h3 className="font-display text-2xl font-bold text-ink">{level.title}</h3>
 									<p className="leading-relaxed text-ink/65">{level.desc}</p>
-									<span className="mt-auto inline-flex w-max rounded-full bg-white/70 px-4 py-1.5 text-xs font-extrabold uppercase tracking-wider text-ink/60">
-										{level.chip}
-									</span>
 								</div>
 							</Reveal>
 						);

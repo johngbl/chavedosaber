@@ -3,7 +3,7 @@ import { SCHOOL } from "../../content/school";
 import { scrollToId } from "../../lib/smoothScroll";
 import { IconArrowDown, IconBook, IconCheck, IconKey, IconSnow, IconUsers, IconWhatsapp } from "./icons";
 
-const TRUST = ["INEP 29469694", "Rede privada", "Acessibilidade completa"];
+const TRUST = ["Educação Infantil e Fundamental", "Salas climatizadas", "Acessibilidade completa"];
 
 export function Hero() {
 	const { scrollY } = useScroll();
@@ -70,9 +70,8 @@ export function Hero() {
 						transition={{ duration: 0.7, delay: 0.2 }}
 						className="mt-6 max-w-xl text-lg leading-relaxed text-ink/65"
 					>
-						Escola particular no coração de {SCHOOL.city}, com Educação Infantil, Ensino
-						Fundamental e educação especial — em um espaço acolhedor, climatizado e
-						acessível para cada criança.
+						Escola particular no centro de {SCHOOL.city}, da Educação Infantil ao Ensino
+						Fundamental, com educação especial e estrutura acessível para cada criança.
 					</motion.p>
 
 					<motion.div
@@ -142,7 +141,7 @@ export function Hero() {
 							<span className="flex size-8 items-center justify-center rounded-full bg-brand-green-light text-brand-green">
 								<IconUsers className="size-4" />
 							</span>
-							127 alunos
+							130 alunos
 						</p>
 					</div>
 					<div className="absolute -right-4 bottom-16 animate-float-slow rounded-2xl bg-white px-4 py-3 shadow-xl shadow-ink/10">

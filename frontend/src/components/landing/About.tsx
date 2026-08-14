@@ -22,12 +22,12 @@ export function About() {
 					<SectionTitle
 						eyebrow="A escola"
 						title="Um espaço pensado para aprender feliz"
-						sub="A Escola Chave do Saber oferece um ambiente preparado para o desenvolvimento integral dos alunos: pátio coberto, biblioteca, salas climatizadas e internet banda larga — tudo no centro de Milagres."
+						sub="A Escola Chave do Saber oferece um ambiente preparado para o desenvolvimento integral dos alunos: pátio coberto, biblioteca, salas climatizadas e internet banda larga, tudo no centro de Milagres."
 					/>
 					<Reveal delay={0.15}>
 						<p className="mt-5 leading-relaxed text-ink/65">
 							Nossa proposta une acolhimento e infraestrutura moderna para formar cidadãos
-							críticos, preparados para os desafios do futuro — do primeiro dia de aula ao
+							críticos, preparados para os desafios do futuro, do primeiro dia de aula ao
 							último ano do Fundamental.
 						</p>
 					</Reveal>

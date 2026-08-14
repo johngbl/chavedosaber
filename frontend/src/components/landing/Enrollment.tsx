@@ -15,7 +15,7 @@ const STEPS = [
 	},
 	{
 		title: "Preencha a ficha online",
-		desc: "Em poucos minutos, do celular ou do computador — sem fila e sem papel.",
+		desc: "Em poucos minutos, do celular ou do computador. Sem fila, sem papel.",
 		tone: "bg-brand-blue shadow-brand-blue/30",
 	},
 ];
@@ -42,7 +42,7 @@ export function Enrollment() {
 						</a>
 						<p className="mt-5 flex items-center gap-2 text-sm font-semibold text-ink/50">
 							<IconKey className="size-4 text-brand-yellow" />
-							Cada link é pessoal, intransferível e válido por 30 dias.
+							O link é só seu e vale por 30 dias.
 						</p>
 					</Reveal>
 				</div>
