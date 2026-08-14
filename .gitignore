@@ -39,6 +39,7 @@ pnpm-debug.log*
 coverage/
 
 # Misc
+.tmp/
 *.pem
 *.trace
 *.zip

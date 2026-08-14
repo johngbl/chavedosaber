@@ -7,6 +7,54 @@
 	--color-brand-orange: #f27b35;
 	--color-brand-orange-dark: #d96a28;
 	--color-brand-orange-light: #fef0e8;
+	--color-brand-blue: #3e4797;
+	--color-brand-blue-dark: #2e3579;
+	--color-brand-blue-light: #eef0fb;
+	--color-brand-red: #e8384f;
+	--color-brand-red-dark: #c41e3a;
+	--color-brand-red-light: #fdeef0;
+	--color-brand-yellow: #f2c21b;
+	--color-brand-yellow-light: #fdf6dd;
+	--color-paper: #fbf9f4;
+	--color-ink: #262b45;
+
+	--font-display: "Baloo 2", "Nunito Sans", ui-rounded, system-ui, sans-serif;
+	--font-sans: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
+
+	--animate-marquee: marquee 32s linear infinite;
+	--animate-float: float 7s ease-in-out infinite;
+	--animate-float-slow: float 10s ease-in-out infinite;
+
+	@keyframes marquee {
+		to {
+			transform: translateX(-50%);
+		}
+	}
+
+	@keyframes float {
+		0%,
+		100% {
+			transform: translateY(0);
+		}
+		50% {
+			transform: translateY(-12px);
+		}
+	}
+}
+
+::selection {
+	background: var(--color-brand-yellow);
+	color: var(--color-ink);
+}
+
+/* Lenis (scroll suave) */
+html.lenis,
+html.lenis body {
+	height: auto;
+}
+
+.lenis.lenis-smooth {
+	scroll-behavior: auto !important;
 }
 
 /* ==================== */
