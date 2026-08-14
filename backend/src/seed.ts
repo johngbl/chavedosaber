@@ -33,6 +33,12 @@ function assertStrongPassword(password: string): void {
 
 async function seed() {
 	if (!ADMIN_PASSWORD) {
+		// No boot automático (Dockerfile) a variável pode não existir ainda;
+		// pular é seguro — o seed manual continua exigindo a senha.
+		if (process.argv.includes("--auto")) {
+			console.warn("ADMIN_PASSWORD não definida; pulando criação do admin.");
+			process.exit(0);
+		}
 		throw new Error(
 			"ADMIN_PASSWORD não definida. Defina-a em .env ou no ambiente antes de rodar o seed.",
 		);

@@ -6,9 +6,10 @@
 #   2. Configure as variáveis abaixo (Environment > Advanced):
 #      POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, JWT_SECRET,
 #      ADMIN_EMAIL, ADMIN_NAME, ADMIN_PASSWORD, CORS_ORIGIN, APP_PORT.
-#   3. Deploy. O backend sincroniza o schema automaticamente no boot.
-#   4. Crie o admin (uma vez): terminal do container backend:
-#      `docker compose --profile seed run --rm seed`
+#   3. Deploy. O backend sincroniza o schema e cria o admin
+#      automaticamente no boot (seed --auto, idempotente), desde que
+#      ADMIN_PASSWORD esteja definida. O serviço `seed` segue disponível
+#      para renovação manual com --force.
 # ============================================================
 
 services:
@@ -42,6 +43,7 @@ services:
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@escolachave.com}
       ADMIN_NAME: ${ADMIN_NAME:-Administrador}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
     depends_on:
       postgres:
         condition: service_healthy

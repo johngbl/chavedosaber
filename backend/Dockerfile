@@ -17,6 +17,6 @@ COPY src ./src
 
 EXPOSE 3000
 
-# Sincroniza o schema (idempotente) e inicia a API.
-# REQUER: DATABASE_URL e JWT_SECRET no ambiente (Dokploy).
-CMD ["sh", "-c", "bunx drizzle-kit push --force && bun run src/index.ts"]
+# Sincroniza o schema (idempotente), garante o admin (seed --auto, idempotente)
+# e inicia a API. REQUER: DATABASE_URL e JWT_SECRET no ambiente (Dokploy).
+CMD ["sh", "-c", "bunx drizzle-kit push --force && bun run src/seed.ts -- --auto && bun run src/index.ts"]
