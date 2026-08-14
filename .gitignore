@@ -8,6 +8,7 @@ dist/
 dist-ssr/
 build/
 *.local
+*.tsbuildinfo
 
 # Logs
 *.log
@@ -37,6 +38,9 @@ pnpm-debug.log*
 # Testing
 coverage/
 
+# Agentes / task state (local)
+AGENTS.md
+
 # Misc
 *.pem
 *.trace
@@ -46,4 +50,3 @@ coverage/
 
 # Lock files
 package-lock.json
-bun.lock

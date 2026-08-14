@@ -5,9 +5,19 @@
 		"dev": "concurrently -n backend,frontend -c blue,green \"cd backend && bun run dev\" \"cd frontend && bun run dev\"",
 		"dev:backend": "cd backend && bun run dev",
 		"dev:frontend": "cd frontend && bun run dev",
-		"check": "biome check --write .",
+		"db:up": "docker compose up -d --wait",
+		"db:down": "docker compose down",
+		"db:push": "cd backend && bun run db:push",
+		"seed": "cd backend && bun run seed",
+		"setup": "bun run db:up && bun run db:push && bun run seed",
+		"test": "cd backend && bun test",
+		"test:coverage": "cd backend && bun test --coverage",
+		"test:e2e": "cd backend && bun run test:e2e",
+		"typecheck": "cd backend && bun run typecheck && cd ../frontend && bunx tsc -b --noEmit",
+		"build": "cd frontend && bun run build",
+		"check": "biome check .",
 		"format": "biome format --write .",
-		"lint": "biome lint --write ."
+		"lint": "biome lint ."
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.15",

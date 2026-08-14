@@ -1,0 +1,36 @@
+server {
+	listen 3000;
+	server_name _;
+
+	root /usr/share/nginx/html;
+	index index.html;
+
+	# Proxy da API para o backend.
+	# ${BACKEND_HOST} é renderizado no boot (envsubst):
+	#   - Docker Compose: "backend" (nome do serviço na rede interna)
+	#   - Dokploy modo Dockerfile: nome interno do app backend na rede do Dokploy
+	#
+	# Em produção o Traefik do Dokploy é o edge e escreve o IP real do cliente
+	# como ÚLTIMA entrada do X-Forwarded-For → repassamos a cadeia intacta e o
+	# backend (TRUST_PROXY=true) usa essa última entrada. Sem XFF (edge direto),
+	# o backend usa o X-Real-IP como fallback.
+	location /api/ {
+		proxy_pass http://${BACKEND_HOST}:3000;
+		proxy_http_version 1.1;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $http_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection "upgrade";
+	}
+
+	# SPA fallback
+	location / {
+		try_files $uri $uri/ /index.html;
+	}
+
+	gzip on;
+	gzip_types text/plain text/css application/json application/javascript image/svg+xml;
+	gzip_min_length 1024;
+}

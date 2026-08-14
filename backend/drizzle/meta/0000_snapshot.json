@@ -1,0 +1,393 @@
+{
+	"id": "75bb5cc6-b5ae-4f68-bb45-7882dbfac2d9",
+	"prevId": "00000000-0000-0000-0000-000000000000",
+	"version": "7",
+	"dialect": "postgresql",
+	"tables": {
+		"public.matriculas": {
+			"name": "matriculas",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"status": {
+					"name": "status",
+					"type": "varchar(20)",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'pendente'"
+				},
+				"serie": {
+					"name": "serie",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"turno": {
+					"name": "turno",
+					"type": "varchar(20)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"nome_aluno": {
+					"name": "nome_aluno",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"data_nascimento": {
+					"name": "data_nascimento",
+					"type": "date",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"sexo": {
+					"name": "sexo",
+					"type": "varchar(1)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"cor_raca": {
+					"name": "cor_raca",
+					"type": "varchar(30)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"naturalidade": {
+					"name": "naturalidade",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"sus": {
+					"name": "sus",
+					"type": "varchar(20)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"cpf_aluno": {
+					"name": "cpf_aluno",
+					"type": "varchar(14)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"nome_pai": {
+					"name": "nome_pai",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"nome_mae": {
+					"name": "nome_mae",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"endereco": {
+					"name": "endereco",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"telefones": {
+					"name": "telefones",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"telefone2": {
+					"name": "telefone2",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"telefone3": {
+					"name": "telefone3",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"email_contato": {
+					"name": "email_contato",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"zona_residencia": {
+					"name": "zona_residencia",
+					"type": "varchar(7)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"utiliza_transporte_escolar": {
+					"name": "utiliza_transporte_escolar",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"possui_problema_saude": {
+					"name": "possui_problema_saude",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"qual_problema_saude": {
+					"name": "qual_problema_saude",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"faz_uso_medicacao": {
+					"name": "faz_uso_medicacao",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"possui_relatorio_medico": {
+					"name": "possui_relatorio_medico",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"apresenta_alergia": {
+					"name": "apresenta_alergia",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"qual_alergia": {
+					"name": "qual_alergia",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"possui_deficiencia_ou_tgd": {
+					"name": "possui_deficiencia_ou_tgd",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"def_cegueira": {
+					"name": "def_cegueira",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"def_baixa_visao": {
+					"name": "def_baixa_visao",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"def_surdez": {
+					"name": "def_surdez",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"def_autismo_infantil": {
+					"name": "def_autismo_infantil",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"def_sindrome_asperger": {
+					"name": "def_sindrome_asperger",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"def_altas_habilidades_superdotacao": {
+					"name": "def_altas_habilidades_superdotacao",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"def_surdocegueira": {
+					"name": "def_surdocegueira",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"def_fisica": {
+					"name": "def_fisica",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"def_sindrome_rett": {
+					"name": "def_sindrome_rett",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"def_transtorno_desintegrativo": {
+					"name": "def_transtorno_desintegrativo",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"def_auditiva_infancia": {
+					"name": "def_auditiva_infancia",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"def_intelectual": {
+					"name": "def_intelectual",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"def_multipla": {
+					"name": "def_multipla",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"recebe_bolsa_familia": {
+					"name": "recebe_bolsa_familia",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"numero_nis": {
+					"name": "numero_nis",
+					"type": "varchar(15)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"autorizo_uso_imagem": {
+					"name": "autorizo_uso_imagem",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"nome_responsavel": {
+					"name": "nome_responsavel",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"rg_responsavel": {
+					"name": "rg_responsavel",
+					"type": "varchar(14)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"cpf_responsavel": {
+					"name": "cpf_responsavel",
+					"type": "varchar(14)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.users": {
+			"name": "users",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"nome": {
+					"name": "nome",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"email": {
+					"name": "email",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"senha": {
+					"name": "senha",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"users_email_unique": {
+					"name": "users_email_unique",
+					"nullsNotDistinct": false,
+					"columns": ["email"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		}
+	},
+	"enums": {},
+	"schemas": {},
+	"sequences": {},
+	"roles": {},
+	"policies": {},
+	"views": {},
+	"_meta": {
+		"columns": {},
+		"schemas": {},
+		"tables": {}
+	}
+}

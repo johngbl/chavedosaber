@@ -1,0 +1,85 @@
+# ============================================================
+# Deploy de produção — Dokploy (docker-compose)
+#
+# Uso no Dokploy:
+#   1. Crie um projeto "docker compose" apontando para este arquivo.
+#   2. Configure as variáveis abaixo (Environment > Advanced):
+#      POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, JWT_SECRET,
+#      ADMIN_EMAIL, ADMIN_NAME, ADMIN_PASSWORD, CORS_ORIGIN, APP_PORT.
+#   3. Deploy. O backend sincroniza o schema automaticamente no boot.
+#   4. Crie o admin (uma vez): terminal do container backend:
+#      `docker compose --profile seed run --rm seed`
+# ============================================================
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-escolachave}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no painel do Dokploy}
+      POSTGRES_DB: ${POSTGRES_DB:-escolachave}
+    volumes:
+      - pgdata_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-escolachave} -d ${POSTGRES_DB:-escolachave}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      # O backend NUNCA deve ver credenciais default em produção.
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET no painel (gere com openssl rand -hex 32)}
+      NODE_ENV: production
+      PORT: "3000"
+      HOST: 0.0.0.0
+      TRUST_PROXY: "true"
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@escolachave.com}
+      ADMIN_NAME: ${ADMIN_NAME:-Administrador}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    expose:
+      - "3000"
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    environment:
+      # Nome do serviço backend na rede interna do compose (usado pelo nginx).
+      BACKEND_HOST: backend
+    depends_on:
+      - backend
+    # SEM ports publicado: em produção o Traefik do Dokploy expõe via domínio
+    # (Dokploy > serviço frontend > Domains, porta interna 3000).
+    # Isso evita conflito com o Traefik, que já ocupa as portas 80/443 do host.
+    # Para teste local, descomente (ex.: porta 8080):
+    # ports:
+    #   - "${APP_PORT:-8080}:3000"
+    expose:
+      - "3000"
+
+  # One-shot: cria/atualiza o admin. Rodar com:
+  #   docker compose --profile seed run --rm seed
+  seed:
+    build: ./backend
+    profiles: ["seed"]
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET no painel do Dokploy}
+      NODE_ENV: production
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@escolachave.com}
+      ADMIN_NAME: ${ADMIN_NAME:-Administrador}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Defina ADMIN_PASSWORD (senha forte, 12+ caracteres)}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["sh", "-c", "bun run src/seed.ts"]
+
+volumes:
+  pgdata_prod:
