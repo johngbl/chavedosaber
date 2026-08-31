@@ -5,12 +5,12 @@ import { Reveal, SectionTitle } from "./ui";
 const STEPS = [
 	{
 		title: "Chame no WhatsApp",
-		desc: "Fale com a secretaria e confirme os dados da criança.",
+		desc: "Fale com nossa equipe e tire suas dúvidas sobre a vaga.",
 		tone: "bg-brand-green shadow-brand-green/30",
 	},
 	{
 		title: "Receba seu link pessoal",
-		desc: "A secretaria gera um link único e seguro de matrícula para a sua família.",
+		desc: "Enviamos o link de pré-matrícula direto no seu celular.",
 		tone: "bg-brand-orange shadow-brand-orange/30",
 	},
 	{
@@ -28,7 +28,7 @@ export function Enrollment() {
 					<SectionTitle
 						eyebrow="Matrículas abertas"
 						title="Sua vaga em três passos simples"
-						sub="Para proteger os dados das famílias e evitar spam, a ficha de matrícula online é aberta apenas por link pessoal emitido pela secretaria."
+						sub="Entre em contato com nossa secretaria pelo WhatsApp para receber o seu link e preencher a ficha de matrícula com tranquilidade."
 					/>
 					<Reveal delay={0.15}>
 						<a
@@ -42,7 +42,7 @@ export function Enrollment() {
 						</a>
 						<p className="mt-5 flex items-center gap-2 text-sm font-semibold text-ink/50">
 							<IconKey className="size-4 text-brand-yellow" />
-							O link é só seu e vale por 30 dias.
+							Atendimento direto com nossa secretaria.
 						</p>
 					</Reveal>
 				</div>

@@ -77,6 +77,24 @@ export function DashboardPage() {
 		}
 	}
 
+	async function handleDeleteLink(id: number) {
+		if (!window.confirm("Deseja realmente excluir este link de matrícula?")) {
+			return;
+		}
+		try {
+			setLinkError("");
+			await apiFetch(`/matriculas/links/${id}`, { method: "DELETE" });
+			setLinks((prev) => prev.filter((l) => l.id !== id));
+			if (newLink && links.find((l) => l.id === id)?.token === newLink.token) {
+				setNewLink(null);
+			}
+		} catch (err) {
+			setLinkError(
+				err instanceof Error ? err.message : "Erro ao excluir link",
+			);
+		}
+	}
+
 	const loadMatriculas = useCallback(async () => {
 		try {
 			setLoading(true);
@@ -157,8 +175,7 @@ export function DashboardPage() {
 								Links de Matrícula
 							</h2>
 							<p className="text-xs text-gray-500 mt-0.5">
-								Uso único — válido por 30 dias. Envie o link para a família
-								preencher a ficha.
+								Envie o link para a família realizar a pré-matrícula online.
 							</p>
 						</div>
 						<button
@@ -226,7 +243,7 @@ export function DashboardPage() {
 								) : links.length === 0 ? (
 									<tr>
 										<td colSpan={4} className="px-3 py-3 text-gray-400">
-											Nenhum link gerado ainda.
+											Nenhum link gerado até o momento.
 										</td>
 									</tr>
 								) : (
@@ -261,13 +278,22 @@ export function DashboardPage() {
 													</span>
 												</td>
 												<td className="px-3 py-2">
-													<button
-														type="button"
-														onClick={() => copyLink(`/matricula/${link.token}`)}
-														className="text-xs text-brand-green hover:underline"
-													>
-														Copiar link
-													</button>
+													<div className="flex items-center gap-3">
+														<button
+															type="button"
+															onClick={() => copyLink(`/matricula/${link.token}`)}
+															className="text-xs text-brand-green hover:underline font-medium"
+														>
+															Copiar link
+														</button>
+														<button
+															type="button"
+															onClick={() => handleDeleteLink(link.id)}
+															className="text-xs text-red-500 hover:text-red-700 hover:underline"
+														>
+															Excluir
+														</button>
+													</div>
 												</td>
 											</tr>
 										);

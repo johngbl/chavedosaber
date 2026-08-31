@@ -32,6 +32,11 @@ function createMockDb() {
 				})),
 			})),
 		})),
+		delete: mock(() => ({
+			where: mock((..._args: unknown[]) => ({
+				returning: mock((..._args: unknown[]) => Promise.resolve([])),
+			})),
+		})),
 	};
 }
 
@@ -428,6 +433,67 @@ describe("Matrícula Routes", () => {
 				expect(response.status).toBe(200);
 				const body = (await response.json()) as unknown[];
 				expect(body).toHaveLength(1);
+			});
+		});
+
+		describe("DELETE /api/matriculas/links/:id (excluir)", () => {
+			it("should reject unauthenticated request with 401", async () => {
+				const { matriculaRoutes } = await import("../routes/matriculas");
+				const app = new Elysia().use(matriculaRoutes);
+
+				const response = await app.handle(
+					new Request("http://localhost/api/matriculas/links/1", {
+						method: "DELETE",
+					}),
+				);
+
+				expect(response.status).toBe(401);
+			});
+
+			it("should return 404 when link does not exist", async () => {
+				const jwtToken = await generateValidToken();
+				mockDb.delete.mockReturnValue({
+					where: mock(() => ({
+						returning: mock(() => Promise.resolve([])),
+					})),
+				} as any);
+
+				const { matriculaRoutes } = await import("../routes/matriculas");
+				const app = new Elysia().use(matriculaRoutes);
+
+				const response = await app.handle(
+					new Request("http://localhost/api/matriculas/links/999", {
+						method: "DELETE",
+						headers: { Authorization: `Bearer ${jwtToken}` },
+					}),
+				);
+
+				expect(response.status).toBe(404);
+				const body = (await response.json()) as { error: string };
+				expect(body.error).toBe("Link não encontrado");
+			});
+
+			it("should delete existing link and return 200", async () => {
+				const jwtToken = await generateValidToken();
+				mockDb.delete.mockReturnValue({
+					where: mock(() => ({
+						returning: mock(() => Promise.resolve([futureLink])),
+					})),
+				} as any);
+
+				const { matriculaRoutes } = await import("../routes/matriculas");
+				const app = new Elysia().use(matriculaRoutes);
+
+				const response = await app.handle(
+					new Request("http://localhost/api/matriculas/links/1", {
+						method: "DELETE",
+						headers: { Authorization: `Bearer ${jwtToken}` },
+					}),
+				);
+
+				expect(response.status).toBe(200);
+				const body = (await response.json()) as { success: boolean };
+				expect(body.success).toBe(true);
 			});
 		});
 

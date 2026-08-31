@@ -14,7 +14,7 @@ export function StepFiliacao({ data, onChange, errors }: StepProps) {
 	return (
 		<div className="space-y-4">
 			<h2 className="text-lg font-semibold text-gray-800 mb-4">
-				Filiação, Endereço e Contactos
+				Filiação, Endereço e Contatos
 			</h2>
 
 			<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -84,7 +84,7 @@ export function StepFiliacao({ data, onChange, errors }: StepProps) {
 						htmlFor="telefones"
 						className="block text-sm font-medium text-gray-700 mb-1"
 					>
-						Telefones para Contacto *
+						Telefones para Contato *
 					</label>
 					<div className="space-y-2">
 						<div className="flex items-center gap-2">
@@ -142,7 +142,7 @@ export function StepFiliacao({ data, onChange, errors }: StepProps) {
 						htmlFor="emailContato"
 						className="block text-sm font-medium text-gray-700 mb-1"
 					>
-						E-mail de Contacto
+						E-mail para Contato
 					</label>
 					<input
 						id="emailContato"

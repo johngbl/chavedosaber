@@ -26,12 +26,12 @@ const STEP_VALIDATORS: ((data: MatriculaFormData) => StepErrors)[] = [
 		if (!data.nomeAluno.trim()) e.nomeAluno = "Obrigatório";
 		if (!data.dataNascimento) e.dataNascimento = "Obrigatório";
 		else if (!isValidDate(data.dataNascimento))
-			e.dataNascimento = "Data inválida ou futura";
+			e.dataNascimento = "Data de nascimento inválida";
 		if (!data.sexo) e.sexo = "Obrigatório";
 		if (!data.corRaca) e.corRaca = "Obrigatório";
 		if (!data.naturalidade.trim()) e.naturalidade = "Obrigatório";
 		if (data.cpfAluno && !isValidCpf(data.cpfAluno))
-			e.cpfAluno = "CPF inválido (verifique os dígitos)";
+			e.cpfAluno = "CPF inválido. Por favor, confira os números";
 		return e;
 	},
 	(data) => {
@@ -53,7 +53,7 @@ const STEP_VALIDATORS: ((data: MatriculaFormData) => StepErrors)[] = [
 			e.rgResponsavel = "Informe ao menos 4 dígitos";
 		if (!data.cpfResponsavel.trim()) e.cpfResponsavel = "Obrigatório";
 		else if (!isValidCpf(data.cpfResponsavel))
-			e.cpfResponsavel = "CPF inválido (verifique os dígitos)";
+			e.cpfResponsavel = "CPF inválido. Por favor, confira os números";
 		if (
 			data.recebeBolsaFamilia &&
 			data.numeroNis &&

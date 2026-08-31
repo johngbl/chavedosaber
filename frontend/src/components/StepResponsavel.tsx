@@ -190,17 +190,15 @@ export function StepResponsavel({ data, onChange, errors }: StepProps) {
 					{/* Termo Rolável */}
 					<div className="border border-gray-200 rounded-lg bg-gray-50 p-3 max-h-40 overflow-y-auto">
 						<h4 className="text-xs font-bold text-gray-800 mb-2">
-							TERMO DE AUTORIZAÇÃO PARA USO DE IMAGEM E VOZ (ECA / ECA Digital
-							2025)
+							Termo de Autorização para Uso de Imagem e Voz
 						</h4>
 						<p className="text-xs text-gray-700 leading-relaxed">
-							A Escola Chave do Saber, inscrita no CNPJ 24.382.774/0001-92,
-							solicita autorização para uso de imagem e voz do educando em
+							A Escola Chave do Saber solicita autorização para uso de imagem e voz do educando em
 							atividades pedagógicas, eventos promovidos, materiais
 							institucionais impressos e digitais, e redes sociais oficiais da
 							escola. Garantimos que a imagem será utilizada com ética e
 							respeito, preservando a dignidade do(a) aluno(a), sem fins
-							comerciais, com medidas de segurança digital adequadas à idade.
+							comerciais, com medidas de segurança e privacidade adequadas.
 							Esta autorização tem validade por prazo indeterminado e pode ser
 							revogada por escrito a qualquer momento.
 						</p>
@@ -223,9 +221,7 @@ export function StepResponsavel({ data, onChange, errors }: StepProps) {
 							htmlFor="consentimentoTermos"
 							className="text-sm text-gray-700 leading-relaxed"
 						>
-							Declaro que li e estou de acordo com os termos de tratamento de
-							dados e manifestei minha decisão sobre a autorização de uso de
-							imagem acima descrita. *
+							Declaro que li e concordo com os termos de privacidade e autorização informados acima. *
 						</label>
 					</div>
 					{errors.consentimento && (

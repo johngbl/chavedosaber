@@ -272,6 +272,30 @@ export const matriculaRoutes = new Elysia({ prefix: "/api/matriculas" })
 					.limit(20);
 				return data;
 			})
+			// Excluir link de matrícula.
+			.delete(
+				"/links/:id",
+				async ({ params, set }) => {
+					const id = Number(params.id);
+					if (!Number.isFinite(id)) {
+						set.status = 400;
+						return { error: "ID inválido" };
+					}
+					const [deleted] = await db
+						.delete(matriculaLinks)
+						.where(eq(matriculaLinks.id, id))
+						.returning();
+					if (!deleted) {
+						set.status = 404;
+						return { error: "Link não encontrado" };
+					}
+					set.status = 200;
+					return { success: true };
+				},
+				{
+					params: t.Object({ id: t.String() }),
+				},
+			)
 			.get(
 				"/",
 				async ({ query }) => {
